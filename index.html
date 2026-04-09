@@ -496,6 +496,65 @@ Permítete sentir, soltar y ser tú, con total confianza.
   <!--  <a href="#ENLACE-POLITICA-PRIVACIDAD">Privacidad</a> -->
   </div>
 </footer>
+<!-- ═══════ CONTADOR DE VISITAS ═══════ -->
+<div id="visit-counter" style="
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  padding: 7px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: -apple-system, sans-serif;
+  font-size: 13px;
+  color: #666;
+  box-shadow: 0 2px 8px rgba(0,0,0,.10);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity .4s;
+">
+  🍀 Visitas: <strong id="visit-num" style="color:#7F77DD;font-size:15px">...</strong>
+</div>
 
+<script>
+  const PAGE_KEY  = "tecnologiaconsciente"; // cambia por tu página
+  const NAMESPACE = "Dakux1111";         // tu usuario GitHub
+
+  const storageKey  = "vc_" + PAGE_KEY;
+  const storageDateKey = "vc_date_" + PAGE_KEY;
+  const today = new Date().toISOString().slice(0, 10);
+  const lastVisit   = localStorage.getItem(storageDateKey);
+  const savedCount  = localStorage.getItem(storageKey);
+
+  function showCount(n) {
+    document.getElementById('visit-num').textContent =
+      Number(n).toLocaleString();
+    document.getElementById('visit-counter').style.opacity = '1';
+  }
+
+  if (lastVisit === today && savedCount) {
+    // Ya visitaste hoy → muestra el número guardado localmente, sin llamar API
+    showCount(savedCount);
+  } else {
+    // Primera visita del día → llama /up, guarda resultado y fecha
+    fetch(`https://api.counterapi.dev/v1/${NAMESPACE}/${PAGE_KEY}/up`)
+      .then(r => r.json())
+      .then(d => {
+        const count = d.count ?? d.value ?? d.hits ?? savedCount ?? '—';
+        showCount(count);
+        localStorage.setItem(storageKey, count);
+        localStorage.setItem(storageDateKey, today);
+      })
+      .catch(() => {
+        // Si la API falla, muestra el último número guardado si existe
+        if (savedCount) showCount(savedCount);
+        else document.getElementById('visit-counter').style.display = 'none';
+      });
+  }
+</script>
+<!-- ═══════════════════════════════════ -->
 </body>
 </html>
